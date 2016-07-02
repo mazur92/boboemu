@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		FD640D0A1D27A3C30068407D /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = FD640D091D27A3C30068407D /* main.c */; };
+		FD640D121D27A3E60068407D /* cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = FD640D101D27A3E60068407D /* cpu.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +26,8 @@
 /* Begin PBXFileReference section */
 		FD640D061D27A3C20068407D /* emulator8080 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = emulator8080; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD640D091D27A3C30068407D /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		FD640D101D27A3E60068407D /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpu.c; sourceTree = "<group>"; };
+		FD640D111D27A3E60068407D /* cpu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpu.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +61,8 @@
 			isa = PBXGroup;
 			children = (
 				FD640D091D27A3C30068407D /* main.c */,
+				FD640D101D27A3E60068407D /* cpu.c */,
+				FD640D111D27A3E60068407D /* cpu.h */,
 			);
 			path = emulator8080;
 			sourceTree = "<group>";
@@ -118,6 +123,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD640D121D27A3E60068407D /* cpu.c in Sources */,
 				FD640D0A1D27A3C30068407D /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
