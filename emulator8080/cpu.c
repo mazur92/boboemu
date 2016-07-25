@@ -304,11 +304,18 @@ int emulate8080op(cpu_state* state){
             state->memory[bc] = state->a;
             break;
         }
-        case 0x03: unimplemented_instruction(state); break;
+        case 0x03: //INX B
+        {
+            uint32_t bc = (state->b << 8) | state->c;
+            bc += 1;
+            
+            break;
+        }
         case 0x04: //INR B
         {
             uint8_t res = state->b + 1;
             //TODO: implement flags
+            state->cc.z = (res == 0);
             state->b = res;
             break;
         }
@@ -326,7 +333,13 @@ int emulate8080op(cpu_state* state){
             state->pc += 1;
             break;
         }
-        case 0x07: unimplemented_instruction(state); break;
+        case 0x07: //RLC (Rotate left)
+        {
+            uint8_t x = state->a;
+            state->a = ((x & 1) >> 7) | (x << 1);
+            state->cc.cy = (1 == (x & 1));
+            break;
+        }
         case 0x08: unimplemented_instruction(state); break;
         case 0x09: unimplemented_instruction(state); break;
         case 0x0a: unimplemented_instruction(state); break;
@@ -345,7 +358,13 @@ int emulate8080op(cpu_state* state){
             state->pc += 1;
             break;
         }
-        case 0x0f: unimplemented_instruction(state); break;
+        case 0x0f: //RRC (Rotate right)
+        {
+            uint8_t x = state->a;
+            state->a = ((x & 1) << 7) | (x >> 1);
+            state->cc.cy = (1 == (x & 1));
+            break;
+        }
         case 0x10: unimplemented_instruction(state); break;
         case 0x11: unimplemented_instruction(state); break;
         case 0x12: unimplemented_instruction(state); break;
