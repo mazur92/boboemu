@@ -337,7 +337,7 @@ int emulate8080op(cpu_state* state){
         {
             uint8_t x = state->a;
             state->a = ((x & 1) >> 7) | (x << 1);
-            state->cc.cy = (1 == (x & 1));
+            state->cc.cy = (0x80 == (x & 0x80));
             break;
         }
         case 0x08: //Empty instruction
