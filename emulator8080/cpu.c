@@ -306,9 +306,9 @@ int emulate8080op(cpu_state* state){
         }
         case 0x03: //INX B
         {
-            uint32_t bc = (state->b << 8) | state->c;
-            bc += 1;
-            
+            state->c++;
+            if (state->b == 0)
+                state->b++;
             break;
         }
         case 0x04: //INR B
@@ -340,10 +340,33 @@ int emulate8080op(cpu_state* state){
             state->cc.cy = (1 == (x & 1));
             break;
         }
-        case 0x08: unimplemented_instruction(state); break;
-        case 0x09: unimplemented_instruction(state); break;
-        case 0x0a: unimplemented_instruction(state); break;
-        case 0x0b: unimplemented_instruction(state); break;
+        case 0x08: //Empty instruction
+        {
+            break;
+        }
+        case 0x09: //DAD B
+        {
+            uint16_t hl = (state->h << 8) | state->l;
+            uint16_t bc = (state->b << 8) | state->c;
+            uint32_t res = hl + bc;
+            state->h = (res & 0xff00) >> 8;
+            state->l = res & 0xff;
+            state->cc.cy = ((res & 0xffff0000) !=0);
+            break;
+        }
+        case 0x0a: //LDAX B,D16
+        {
+            uint32_t bc = (state->b << 8) | state->c;
+            state->a = state->memory[bc];
+            break;
+        }
+        case 0x0b: //DCX B
+        {
+            state->c -= 1;
+            if (state->c == 0xff)
+                state->b =-1;
+            break;
+        }
         case 0x0c: //INR C
         {
             uint8_t res = state->c + 1;
