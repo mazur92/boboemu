@@ -18,7 +18,7 @@ typedef struct conditioncodes {
     uint8_t s:1;
     uint8_t p:1;
     uint8_t cy:1;
-    uint8_t ac:1;
+    uint8_t ac:5;
     uint8_t pad:3;
 } conditioncodes;
 
@@ -39,6 +39,7 @@ typedef struct cpu_state {
 
 int disassemble8080_op(unsigned char *codebuffer, int pc);
 int emulate8080op(cpu_state* state);
-cpu_state* init8080(void);
+cpu_state* init8080(int memsize);
+int parity(int x, int size);
 
 #endif /* cpu_h */

@@ -28,6 +28,7 @@
 		FD640D091D27A3C30068407D /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		FD640D101D27A3E60068407D /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpu.c; sourceTree = "<group>"; };
 		FD640D111D27A3E60068407D /* cpu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpu.h; sourceTree = "<group>"; };
+		FD99A6561E13ECCB00A78ED8 /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				FD640D091D27A3C30068407D /* main.c */,
+				FD99A6561E13ECCB00A78ED8 /* main.h */,
 				FD640D101D27A3E60068407D /* cpu.c */,
 				FD640D111D27A3E60068407D /* cpu.h */,
 			);
@@ -245,6 +247,7 @@
 				FD640D0F1D27A3C30068407D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -286,9 +286,25 @@ void unimplemented_instruction(cpu_state* state){
     exit(1);
 }
 
+int parity(int x, int size){
+    int i;
+    int p = 0;
+    x = (x & ((1<<size)-1));
+    for (i=0; i < size; i++){
+        if(x & 0x1) p++;
+        x = x >> 1;
+    }
+    return (0 == (p & 0x1));
+}
+
 int emulate8080op(cpu_state* state){
     
+    int cycles = 4;
     unsigned char *opcode = &state->memory[state->pc];
+    
+    disassemble8080_op(state->memory, state->pc);
+    
+    state->pc+=1;
     
     switch (*opcode) {
         case 0x00:  //NOP
@@ -314,7 +330,15 @@ int emulate8080op(cpu_state* state){
         case 0x04: //INR B
         {
             uint8_t res = state->b + 1;
-            //TODO: implement flags
+            if (res & 0x80)
+                state->cc.s = 1;
+            else
+                state->cc.s = 0;
+            if (res > 0xff)
+                state->cc.cy = 1;
+            else
+                state->cc.cy = 0;
+            state->cc.p = parity(res, 8);
             state->cc.z = (res == 0);
             state->b = res;
             break;
@@ -322,7 +346,15 @@ int emulate8080op(cpu_state* state){
         case 0x05: //DCR B
         {
             uint8_t res = state->b - 1;
-            //TODO: implement flags
+            if (res & 0x80)
+                state->cc.s = 1;
+            else
+                state->cc.s = 0;
+            if (res > 0xff)
+                state->cc.cy = 1;
+            else
+                state->cc.cy = 0;
+            state->cc.p = parity(res, 8);
             state->cc.z = (res == 0);
             state->b = res;
             break;
@@ -354,7 +386,7 @@ int emulate8080op(cpu_state* state){
             state->cc.cy = ((res & 0xffff0000) !=0);
             break;
         }
-        case 0x0a: //LDAX B,D16
+        case 0x0a: //LDAX B
         {
             uint32_t bc = (state->b << 8) | state->c;
             state->a = state->memory[bc];
@@ -371,10 +403,18 @@ int emulate8080op(cpu_state* state){
         {
             uint8_t res = state->c + 1;
             //TODO: flags
+            state->cc.z = (res == 0);
             state->c = res;
             break;
         }
-        case 0x0d: unimplemented_instruction(state); break;
+        case 0x0d: //DCR C
+        {
+            uint8_t res = state->c - 1;
+            //TODO: flags (S, P, AC)
+            state->cc.z = (res == 0);
+            state->c = res;
+            break;
+        }
         case 0x0e: //MVI C,D8
         {
             state->c = opcode[1];
@@ -388,14 +428,56 @@ int emulate8080op(cpu_state* state){
             state->cc.cy = (1 == (x & 1));
             break;
         }
-        case 0x10: unimplemented_instruction(state); break;
-        case 0x11: unimplemented_instruction(state); break;
-        case 0x12: unimplemented_instruction(state); break;
-        case 0x13: unimplemented_instruction(state); break;
-        case 0x14: unimplemented_instruction(state); break;
-        case 0x15: unimplemented_instruction(state); break;
-        case 0x16: unimplemented_instruction(state); break;
-        case 0x17: unimplemented_instruction(state); break;
+        case 0x10: //Empty instruction
+        {
+            break;
+        }
+        case 0x11: //LXI D,D16
+        {
+            state->e = opcode[1];
+            state->d = opcode[2];
+            state->pc += 2;
+            break;
+        }
+        case 0x12: //STAX D
+        {
+            uint32_t de = (state->d << 8) | state->e;
+            state->memory[de] = state->a;
+            break;
+        }
+        case 0x13: //INX D
+        {
+            state->e++;
+            if (state->d == 0)
+                state->d++;
+            break;
+        }
+        case 0x14: //INR D
+        {
+            uint8_t res = state-> d + 1;
+            //TODO flags S,P,AC
+            state->cc.z = (res == 0);
+            state->d = res;
+            break;
+        }
+        case 0x15: //DCR D
+        {
+            uint8_t res = state-> d - 1;
+            //TODO flags S,P,AC
+            state->cc.z = (res == 0);
+            state->d = res;
+            break;
+        }
+        case 0x16: //MVI D, D8
+        {
+            state->d = opcode[1];
+            state->pc += 1;
+            break;
+        }
+        case 0x17: //RAL
+        {
+            unimplemented_instruction(state); break;
+        }
         case 0x18: unimplemented_instruction(state); break;
         case 0x19: unimplemented_instruction(state); break;
         case 0x1a: unimplemented_instruction(state); break;
@@ -633,8 +715,9 @@ int emulate8080op(cpu_state* state){
     return 0;
 }
 
-cpu_state* init8080(void){
+cpu_state* init8080(int memsize){
+    if (memsize >= 0x10000) memsize = 0x10000 - 1;
     cpu_state* init_state = calloc(1, sizeof(cpu_state));
-    init_state->memory = malloc(0x1000); //Initialize 16K of memory
+    init_state->memory = malloc(memsize); //Initialize memory
     return init_state;
 }
