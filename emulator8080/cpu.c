@@ -1527,8 +1527,21 @@ int emulate8080op(cpu_state* state){
             state->cc.p = parity(res & 0xff, 8);
             break;
         }
-        case 0xc0: return unimplemented_instruction(state);
-        case 0xc1: return unimplemented_instruction(state);
+        case 0xc0: //RNZ
+        {
+            if (state->cc.z){
+                state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
+                state->pc += 2;
+            }
+            break;
+        }
+        case 0xc1: //POP B
+        {
+            state->c = state->memory[state->sp];
+            state->b = state->memory[state->sp + 1];
+            state->sp += 2;
+            break;
+        }
         case 0xc2: //JNZ
         {
             if (state->cc.z) state->pc = (opcode[2] << 8) | opcode[1];
@@ -1540,21 +1553,56 @@ int emulate8080op(cpu_state* state){
             state->pc = (opcode[2] << 8) | opcode[1];
             break;
         }
-        case 0xc4: return unimplemented_instruction(state);
+        case 0xc4: //CNZ addr
+        {
+            if (state->cc.z){
+                uint16_t ret = state->pc+2;
+                state->memory[state->sp-1] = (ret >> 8) & 0xff;
+                state->memory[state->sp-2] = ret & 0xff;
+                state->sp = state->sp-2;
+                state->pc = (opcode[2] << 8) | opcode[1];
+            }
+            break;
+        }
         case 0xc5: return unimplemented_instruction(state);
         case 0xc6: return unimplemented_instruction(state);
         case 0xc7: return unimplemented_instruction(state);
-        case 0xc8: return unimplemented_instruction(state);
-        case 0xc9: return unimplemented_instruction(state);
+        case 0xc8: //RZ
+        {
+            if (!state->cc.z){
+                state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
+                state->sp += 2;
+            }
+            break;
+        }
+        case 0xc9: //RET
+        {
+            state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
+            state->sp += 2;
+            break;
+        }
         case 0xca: //JZ addr
         {
             if (!state->cc.z) state->pc = (opcode[2] << 8) | opcode[1];
             else state->pc += 2;
             break;
         }
-        case 0xcb: return unimplemented_instruction(state);
-        case 0xcc: return unimplemented_instruction(state);
-        case 0xcd:
+        case 0xcb: //-
+        {
+            return unimplemented_instruction(state);
+        }
+        case 0xcc: //CZ addr
+        {
+            if (!state->cc.z){
+                uint16_t ret = state->pc+2;
+                state->memory[state->sp-1] = (ret >> 8) & 0xff;
+                state->memory[state->sp-2] = ret & 0xff;
+                state->sp = state->sp-2;
+                state->pc = (opcode[2] << 8) | opcode[1];
+            }
+            break;
+        }
+        case 0xcd: //CALL
         {
             uint16_t ret = state->pc+2;
             state->memory[state->sp-1] = (ret >> 8) & 0xff;
@@ -1565,9 +1613,27 @@ int emulate8080op(cpu_state* state){
         }
         case 0xce: return unimplemented_instruction(state);
         case 0xcf: return unimplemented_instruction(state);
-        case 0xd0: return unimplemented_instruction(state);
-        case 0xd1: return unimplemented_instruction(state);
-        case 0xd2: return unimplemented_instruction(state);
+        case 0xd0: //RNC
+        {
+            if (!state->cc.cy){
+                state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
+                state->sp += 2;
+            }
+            break;
+        }
+        case 0xd1: //POP D
+        {
+            state->e = state->memory[state->sp];
+            state->d = state->memory[state->sp + 1];
+            state->sp += 2;
+            break;
+        }
+        case 0xd2: //JNC addr
+        {
+            if (!state->cc.cy) state->pc = (opcode[2] << 8) | opcode[1];
+            else state->pc += 2;
+            break;
+        }
         case 0xd3: return unimplemented_instruction(state);
         case 0xd4: return unimplemented_instruction(state);
         case 0xd5: return unimplemented_instruction(state);
@@ -1582,7 +1648,13 @@ int emulate8080op(cpu_state* state){
         case 0xde: return unimplemented_instruction(state);
         case 0xdf: return unimplemented_instruction(state);
         case 0xe0: return unimplemented_instruction(state);
-        case 0xe1: return unimplemented_instruction(state);
+        case 0xe1: //POP H
+        {
+            state->l = state->memory[state->sp];
+            state->h = state->memory[state->sp + 1];
+            state->sp += 2;
+            break;
+        }
         case 0xe2: return unimplemented_instruction(state);
         case 0xe3: return unimplemented_instruction(state);
         case 0xe4: return unimplemented_instruction(state);
@@ -1592,7 +1664,17 @@ int emulate8080op(cpu_state* state){
         case 0xe8: return unimplemented_instruction(state);
         case 0xe9: return unimplemented_instruction(state);
         case 0xea: return unimplemented_instruction(state);
-        case 0xeb: return unimplemented_instruction(state);
+        case 0xeb: //XCHG
+        {
+            uint8_t temp = 0x0;
+            temp = state->d;
+            state->d = state->h;
+            state->h = temp;
+            temp = state->l;
+            state->e = state->l;
+            state->l = temp;
+            break;
+        }
         case 0xec: return unimplemented_instruction(state);
         case 0xed: return unimplemented_instruction(state);
         case 0xee: return unimplemented_instruction(state);
@@ -1608,10 +1690,25 @@ int emulate8080op(cpu_state* state){
         case 0xf8: return unimplemented_instruction(state);
         case 0xf9: return unimplemented_instruction(state);
         case 0xfa: return unimplemented_instruction(state);
-        case 0xfb: return unimplemented_instruction(state);
+        case 0xfb: state->int_enable = 1; break; //EI
         case 0xfc: return unimplemented_instruction(state);
-        case 0xfd: return unimplemented_instruction(state);
-        case 0xfe: return unimplemented_instruction(state);
+        case 0xfd: //-
+        {
+            return unimplemented_instruction(state);
+        }
+        case 0xfe: //CPI D8
+        {
+            uint8_t x = state->a = opcode[1];
+            if (x & 0x80)
+                state->cc.s = 1;
+            else
+                state->cc.s = 0;
+            state->cc.p = parity(x, 8);
+            state->cc.cy = (state->a < opcode[1]);
+            state->cc.z = (x == 0);
+            state->pc++;
+            break;
+        }
         case 0xff: return unimplemented_instruction(state);
     }
     state->pc+=1;
