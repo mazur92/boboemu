@@ -964,73 +964,569 @@ int emulate8080op(cpu_state* state){
             uint16_t res = (uint16_t)state->a + (uint16_t)state->b;
             state->cc.z = ((res & 0xff) == 0);
             state->cc.s = (0x80 == (res & 0x80));
-            state->cc.p = parity(res&0xff, 8);
+            state->cc.p = parity(res & 0xff, 8);
             state->a = (res & 0xff);
             break;
         }
-        case 0x81: return unimplemented_instruction(state);
-        case 0x82: return unimplemented_instruction(state);
-        case 0x83: return unimplemented_instruction(state);
-        case 0x84: return unimplemented_instruction(state);
-        case 0x85: return unimplemented_instruction(state);
-        case 0x86: return unimplemented_instruction(state);
-        case 0x87: return unimplemented_instruction(state);
-        case 0x88: return unimplemented_instruction(state);
-        case 0x89: return unimplemented_instruction(state);
-        case 0x8a: return unimplemented_instruction(state);
-        case 0x8b: return unimplemented_instruction(state);
-        case 0x8c: return unimplemented_instruction(state);
-        case 0x8d: return unimplemented_instruction(state);
-        case 0x8e: return unimplemented_instruction(state);
-        case 0x8f: return unimplemented_instruction(state);
-        case 0x90: return unimplemented_instruction(state);
-        case 0x91: return unimplemented_instruction(state);
-        case 0x92: return unimplemented_instruction(state);
-        case 0x93: return unimplemented_instruction(state);
-        case 0x94: return unimplemented_instruction(state);
-        case 0x95: return unimplemented_instruction(state);
-        case 0x96: return unimplemented_instruction(state);
-        case 0x97: return unimplemented_instruction(state);
-        case 0x98: return unimplemented_instruction(state);
-        case 0x99: return unimplemented_instruction(state);
-        case 0x9a: return unimplemented_instruction(state);
-        case 0x9b: return unimplemented_instruction(state);
-        case 0x9c: return unimplemented_instruction(state);
-        case 0x9d: return unimplemented_instruction(state);
-        case 0x9e: return unimplemented_instruction(state);
-        case 0x9f: return unimplemented_instruction(state);
-        case 0xa0: return unimplemented_instruction(state);
-        case 0xa1: return unimplemented_instruction(state);
-        case 0xa2: return unimplemented_instruction(state);
-        case 0xa3: return unimplemented_instruction(state);
-        case 0xa4: return unimplemented_instruction(state);
-        case 0xa5: return unimplemented_instruction(state);
-        case 0xa6: return unimplemented_instruction(state);
-        case 0xa7: return unimplemented_instruction(state);
-        case 0xa8: return unimplemented_instruction(state);
-        case 0xa9: return unimplemented_instruction(state);
-        case 0xaa: return unimplemented_instruction(state);
-        case 0xab: return unimplemented_instruction(state);
-        case 0xac: return unimplemented_instruction(state);
-        case 0xad: return unimplemented_instruction(state);
-        case 0xae: return unimplemented_instruction(state);
-        case 0xaf: return unimplemented_instruction(state);
-        case 0xb0: return unimplemented_instruction(state);
-        case 0xb1: return unimplemented_instruction(state);
-        case 0xb2: return unimplemented_instruction(state);
-        case 0xb3: return unimplemented_instruction(state);
-        case 0xb4: return unimplemented_instruction(state);
-        case 0xb5: return unimplemented_instruction(state);
-        case 0xb6: return unimplemented_instruction(state);
-        case 0xb7: return unimplemented_instruction(state);
-        case 0xb8: return unimplemented_instruction(state);
-        case 0xb9: return unimplemented_instruction(state);
-        case 0xba: return unimplemented_instruction(state);
-        case 0xbb: return unimplemented_instruction(state);
-        case 0xbc: return unimplemented_instruction(state);
-        case 0xbd: return unimplemented_instruction(state);
-        case 0xbe: return unimplemented_instruction(state);
-        case 0xbf: return unimplemented_instruction(state);
+        case 0x81: //ADD C
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->c;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x82: //ADD D
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->d;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x83: //ADD E
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->e;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x84: //ADD H
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->h;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x85: //ADD L
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->l;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x86: //ADD M
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->memory[get_hl_addr(state)];
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x87: //ADD A
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->a;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x88: //ADC B
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->b + state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x89: //ADC C
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->c + state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x8a: //ADC D
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->d + state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x8b: //ADC E
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->e + state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x8c: //ADC H
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->h + state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x8d: //ADC L
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->l + state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x8e: //ADC M
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->memory[get_hl_addr(state)] + state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x8f: //ADC A
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->a + state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x90: //SUB B
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->b;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x91: //SUB C
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->c;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x92: //SUB D
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->d;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x93: //SUB E
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->e;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x94: //SUB H
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->h;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x95: //SUB L
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->l;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x96: //SUB M
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->memory[get_hl_addr(state)];
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x97: //SUB A
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->a;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x98: //SBB B
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->b - state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x99: //SBB C
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->c - state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x9a: //SBB D
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->d - state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x9b: //SBB E
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->e - state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x9c: //SBB H
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->h - state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x9d: //SBB L
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->l - state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x9e: //SBB M
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->memory[get_hl_addr(state)] - state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0x9f: //SBB A
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->a - state->cc.z;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
+        case 0xa0: //ANA B
+        {
+            state->a = state->a & state->b;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xa1: //ANA C
+        {
+            state->a = state->a & state->c;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xa2: //ANA D
+        {
+            state->a = state->a & state->d;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xa3: //ANA E
+        {
+            state->a = state->a & state->e;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xa4: //ANA H
+        {
+            state->a = state->a & state->h;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xa5: //ANA L
+        {
+            state->a = state->a & state->b;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xa6: //ANA M
+        {
+            state->a = state->a & state->memory[get_hl_addr(state)];
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xa7: //ANA A
+        {
+            state->a = state->a & state->a;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xa8: //XRA B
+        {
+            state->a = state->a ^ state->b;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xa9: //XRA C
+        {
+            state->a = state->a ^ state->c;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xaa: //XRA D
+        {
+            state->a = state->a ^ state->d;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xab: //XRA E
+        {
+            state->a = state->a ^ state->e;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xac: //XRA H
+        {
+            state->a = state->a ^ state->h;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xad: //XRA L
+        {
+            state->a = state->a ^ state->l;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xae: //XRA M
+        {
+            state->a = state->a ^ state->memory[get_hl_addr(state)];
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xaf: //XRA A
+        {
+            state->a = state->a ^ state->a;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xb0: //ORA B
+        {
+            state->a = state->a | state->b;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xb1: //ORA C
+        {
+            state->a = state->a | state->c;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xb2: //ORA D
+        {
+            state->a = state->a | state->d;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xb3: //ORA E
+        {
+            state->a = state->a | state->e;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xb4: //ORA H
+        {
+            state->a = state->a | state->h;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xb5: //ORA L
+        {
+            state->a = state->a | state->l;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xb6: //ORA M
+        {
+            state->a = state->a | state->b;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xb7: //ORA A
+        {
+            state->a = state->a | state->a;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0xb8: //CMP B
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->b;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            break;
+        }
+        case 0xb9: //CMP C
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->c;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            break;
+        }
+        case 0xba: //CMP D
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->d;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            break;
+        }
+        case 0xbb: //CMP E
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->e;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            break;
+        }
+        case 0xbc: //CMP H
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->h;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            break;
+        }
+        case 0xbd: //CMP L
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->l;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            break;
+        }
+        case 0xbe: //CMP M
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->memory[get_hl_addr(state)];
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            break;
+        }
+        case 0xbf: //CMP A
+        {
+            uint16_t res = (uint16_t)state->a - (uint16_t)state->a;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res & 0xff, 8);
+            break;
+        }
         case 0xc0: return unimplemented_instruction(state);
         case 0xc1: return unimplemented_instruction(state);
         case 0xc2: //JNZ
