@@ -286,6 +286,11 @@ int unimplemented_instruction(cpu_state* state){
     return state->pc;
 }
 
+uint16_t get_hl_addr(cpu_state* state){
+    uint16_t addr = (state->h << 8) | (state->l);
+    return addr;
+}
+
 int parity(int x, int size){
     int i;
     int p = 0;
@@ -757,82 +762,212 @@ int emulate8080op(cpu_state* state){
             state->memory[state->h << 8 | state->l] = res;
             break;
         }
-        case 0x35: return unimplemented_instruction(state);
-        case 0x36: return unimplemented_instruction(state);
-        case 0x37: return unimplemented_instruction(state);
-        case 0x38: return unimplemented_instruction(state);
-        case 0x39: return unimplemented_instruction(state);
-        case 0x3a: return unimplemented_instruction(state);
-        case 0x3b: return unimplemented_instruction(state);
-        case 0x3c: return unimplemented_instruction(state);
-        case 0x3d: return unimplemented_instruction(state);
-        case 0x3e: return unimplemented_instruction(state);
-        case 0x3f: return unimplemented_instruction(state);
-        case 0x40: return unimplemented_instruction(state);
-        case 0x41: return unimplemented_instruction(state);
-        case 0x42: return unimplemented_instruction(state);
-        case 0x43: return unimplemented_instruction(state);
-        case 0x44: return unimplemented_instruction(state);
-        case 0x45: return unimplemented_instruction(state);
-        case 0x46: return unimplemented_instruction(state);
-        case 0x47: return unimplemented_instruction(state);
-        case 0x48: return unimplemented_instruction(state);
-        case 0x49: return unimplemented_instruction(state);
-        case 0x4a: return unimplemented_instruction(state);
-        case 0x4b: return unimplemented_instruction(state);
-        case 0x4c: return unimplemented_instruction(state);
-        case 0x4d: return unimplemented_instruction(state);
-        case 0x4e: return unimplemented_instruction(state);
-        case 0x4f: return unimplemented_instruction(state);
-        case 0x50: return unimplemented_instruction(state);
-        case 0x51: return unimplemented_instruction(state);
-        case 0x52: return unimplemented_instruction(state);
-        case 0x53: return unimplemented_instruction(state);
-        case 0x54: return unimplemented_instruction(state);
-        case 0x55: return unimplemented_instruction(state);
-        case 0x56: return unimplemented_instruction(state);
-        case 0x57: return unimplemented_instruction(state);
-        case 0x58: return unimplemented_instruction(state);
-        case 0x59: return unimplemented_instruction(state);
-        case 0x5a: return unimplemented_instruction(state);
-        case 0x5b: return unimplemented_instruction(state);
-        case 0x5c: return unimplemented_instruction(state);
-        case 0x5d: return unimplemented_instruction(state);
-        case 0x5e: return unimplemented_instruction(state);
-        case 0x5f: return unimplemented_instruction(state);
-        case 0x60: return unimplemented_instruction(state);
-        case 0x61: return unimplemented_instruction(state);
-        case 0x62: return unimplemented_instruction(state);
-        case 0x63: return unimplemented_instruction(state);
-        case 0x64: return unimplemented_instruction(state);
-        case 0x65: return unimplemented_instruction(state);
-        case 0x66: return unimplemented_instruction(state);
-        case 0x67: return unimplemented_instruction(state);
-        case 0x68: return unimplemented_instruction(state);
-        case 0x69: return unimplemented_instruction(state);
-        case 0x6a: return unimplemented_instruction(state);
-        case 0x6b: return unimplemented_instruction(state);
-        case 0x6c: return unimplemented_instruction(state);
-        case 0x6d: return unimplemented_instruction(state);
-        case 0x6e: return unimplemented_instruction(state);
-        case 0x6f: return unimplemented_instruction(state);
-        case 0x70: return unimplemented_instruction(state);
-        case 0x71: return unimplemented_instruction(state);
-        case 0x72: return unimplemented_instruction(state);
-        case 0x73: return unimplemented_instruction(state);
-        case 0x74: return unimplemented_instruction(state);
-        case 0x75: return unimplemented_instruction(state);
-        case 0x76: return unimplemented_instruction(state);
-        case 0x77: return unimplemented_instruction(state);
-        case 0x78: return unimplemented_instruction(state);
-        case 0x79: return unimplemented_instruction(state);
-        case 0x7a: return unimplemented_instruction(state);
-        case 0x7b: return unimplemented_instruction(state);
-        case 0x7c: return unimplemented_instruction(state);
-        case 0x7d: return unimplemented_instruction(state);
-        case 0x7e: return unimplemented_instruction(state);
-        case 0x7f: return unimplemented_instruction(state);
-        case 0x80: return unimplemented_instruction(state);
+        case 0x35: //DCR M
+        {
+            uint16_t res = ((state->h << 8) | state->l) - 1;
+            state->cc.z = (res == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res, 16);
+            state->memory[state->h << 8 | state->l] = res;
+            break;
+        }
+        case 0x36: //MVI M,D8
+        {
+            state->memory[state->h << 8 | state->l] = opcode[1];
+            state->pc++;
+            break;
+        }
+        case 0x37: //STC
+        {
+            state->cc.cy = 1;
+            break;
+        }
+        case 0x38: //-
+        {
+            return unimplemented_instruction(state);
+        }
+        case 0x39: //DAD SP
+        {
+            uint16_t hl = (state->h << 8) | state->l;
+            uint32_t res = hl + state->sp;
+            state->h = (res & 0xff00) >> 8;
+            state->l = res & 0xff;
+            state->cc.cy = ((res & 0xffff0000) > 0);
+            break;
+        }
+        case 0x3a: //LDA addr
+        {
+            uint16_t addr = (opcode[2] << 8) | (opcode[1]);
+            state->a = state->memory[addr];
+            state->pc+=2;
+            break;
+        }
+        case 0x3b: //DCX SP
+        {
+            state->sp -= 1;
+            break;
+        }
+        case 0x3c: //INR A
+        {
+            state->a += 1;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0x3d: //DCR A
+        {
+            state->a -= 1;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            break;
+        }
+        case 0x3e: //MVI A,D8
+        {
+            state->a = opcode[1];
+            state->pc++;
+            break;
+        }
+        case 0x3f: //CMC
+        {
+            state->cc.cy = ~state->cc.cy;
+            break;
+        }
+        case 0x40: state->b = state->b; break; //MOV B,B
+        case 0x41: state->b = state->c; break; //MOV B,C
+        case 0x42: state->b = state->d; break; //MOV B,D
+        case 0x43: state->b = state->e; break; //MOV B,E
+        case 0x44: state->b = state->h; break; //MOV B,H
+        case 0x45: state->b = state->l; break; //MOV B,L
+        case 0x46: //MOV B,M
+        {
+            state->b = state->memory[get_hl_addr(state)];
+            break;
+        }
+        case 0x47: state->b = state->a; break; //MOV B,A
+            
+        case 0x48: state->c = state->b; break; //MOV C,B
+        case 0x49: state->c = state->c; break; //MOV C,C
+        case 0x4a: state->c = state->d; break; //MOV C,D
+        case 0x4b: state->c = state->e; break; //MOV C,E
+        case 0x4c: state->c = state->h; break; //MOV C,H
+        case 0x4d: state->c = state->l; break; //MOV C,L
+        case 0x4e:
+        {
+            state->c = state->memory[get_hl_addr(state)];
+            break;
+        }
+        case 0x4f: state->c = state->a; break; //MOV C,A
+            
+        case 0x50: state->d = state->b; break; //MOV D,B
+        case 0x51: state->d = state->c; break; //MOV D,C
+        case 0x52: state->d = state->d; break; //MOV D,D
+        case 0x53: state->d = state->e; break; //MOV D,E
+        case 0x54: state->d = state->h; break; //MOV D,H
+        case 0x55: state->d = state->l; break; //MOV D,L
+        case 0x56: //MOV D,M
+        {
+            state->d = state->memory[get_hl_addr(state)];
+            break;
+        }
+        case 0x57: state->d = state->a; break; //MOV D,A
+            
+        case 0x58: state->e = state->b; break; //MOV E,B
+        case 0x59: state->e = state->c; break; //MOV E,C
+        case 0x5a: state->e = state->d; break; //MOV E,D
+        case 0x5b: state->e = state->e; break; //MOV E,E
+        case 0x5c: state->e = state->h; break; //MOV E,H
+        case 0x5d: state->e = state->l; break; //MOV E,L
+        case 0x5e: //MOV E,M
+        {
+            state->e = state->memory[get_hl_addr(state)];
+            break;
+        }
+        case 0x5f: state->e = state->a; break; //MOV E,A
+            
+        case 0x60: state->h = state->b; break; //MOV H,B
+        case 0x61: state->h = state->c; break; //MOV H,C
+        case 0x62: state->h = state->d; break; //MOV H,D
+        case 0x63: state->h = state->e; break; //MOV H,E
+        case 0x64: state->h = state->h; break; //MOV H,H
+        case 0x65: state->h = state->l; break; //MOV H,L
+        case 0x66: //MOV H,M
+        {
+            state->h = state->memory[get_hl_addr(state)];
+            break;
+        }
+        case 0x67: state->h = state->a; break; //MOV H,A
+            
+        case 0x68: state->l = state->b; break; //MOV L,B
+        case 0x69: state->l = state->c; break; //MOV L,C
+        case 0x6a: state->l = state->d; break; //MOV L,D
+        case 0x6b: state->l = state->e; break; //MOV L,E
+        case 0x6c: state->l = state->h; break; //MOV L,H
+        case 0x6d: state->l = state->l; break; //MOV L,L
+        case 0x6e: //MOV L,M
+        {
+            state->l = state->memory[get_hl_addr(state)];
+            break;
+        }
+        case 0x6f: state->l = state->a; break; //MOV L,A
+            
+        case 0x70: //MOV M,B
+        {
+            state->memory[get_hl_addr(state)] = state->b;
+            break;
+        }
+        case 0x71: //MOV M,C
+        {
+            state->memory[get_hl_addr(state)] = state->c;
+            break;
+        }
+        case 0x72: //MOV M,D
+        {
+            state->memory[get_hl_addr(state)] = state->d;
+            break;
+        }
+        case 0x73: //MOV M,E
+        {
+            state->memory[get_hl_addr(state)] = state->e;
+            break;
+        }
+        case 0x74: //MOV M,H
+        {
+            state->memory[get_hl_addr(state)] = state->h;
+            break;
+        }
+        case 0x75: //MOV M,L
+        {
+            state->memory[get_hl_addr(state)] = state->l;
+            break;
+        }
+        case 0x76: //HLT
+        {
+            return unimplemented_instruction(state);
+        }
+        case 0x77: //MOV M,A
+        {
+            state->memory[get_hl_addr(state)] = state->a;
+            break;
+        }
+        case 0x78: state->a = state->b; break; //MOV A,B
+        case 0x79: state->a = state->c; break; //MOV A,C
+        case 0x7a: state->a = state->d; break; //MOV A,D
+        case 0x7b: state->a = state->e; break; //MOV A,E
+        case 0x7c: state->a = state->h; break; //MOV A,H
+        case 0x7d: state->a = state->l; break; //MOV A,L
+        case 0x7e: state->a = state->memory[get_hl_addr(state)]; break; //MOV A,M
+        case 0x7f: state->a = state->a; break; //MOV A,A
+        case 0x80: //ADD B
+        {
+            uint16_t res = (uint16_t)state->a + (uint16_t)state->b;
+            state->cc.z = ((res & 0xff) == 0);
+            state->cc.s = (0x80 == (res & 0x80));
+            state->cc.p = parity(res&0xff, 8);
+            state->a = (res & 0xff);
+            break;
+        }
         case 0x81: return unimplemented_instruction(state);
         case 0x82: return unimplemented_instruction(state);
         case 0x83: return unimplemented_instruction(state);
@@ -915,10 +1050,23 @@ int emulate8080op(cpu_state* state){
         case 0xc7: return unimplemented_instruction(state);
         case 0xc8: return unimplemented_instruction(state);
         case 0xc9: return unimplemented_instruction(state);
-        case 0xca: return unimplemented_instruction(state);
+        case 0xca: //JZ addr
+        {
+            if (!state->cc.z) state->pc = (opcode[2] << 8) | opcode[1];
+            else state->pc += 2;
+            break;
+        }
         case 0xcb: return unimplemented_instruction(state);
         case 0xcc: return unimplemented_instruction(state);
-        case 0xcd: return unimplemented_instruction(state);
+        case 0xcd:
+        {
+            uint16_t ret = state->pc+2;
+            state->memory[state->sp-1] = (ret >> 8) & 0xff;
+            state->memory[state->sp-2] = ret & 0xff;
+            state->sp = state->sp-2;
+            state->pc = (opcode[2] << 8) | opcode[1];
+            break;
+        }
         case 0xce: return unimplemented_instruction(state);
         case 0xcf: return unimplemented_instruction(state);
         case 0xd0: return unimplemented_instruction(state);
