@@ -1676,8 +1676,23 @@ int emulate8080op(cpu_state* state){
             else state->pc += 2;
             break;
         }
-        case 0xd3: return unimplemented_instruction(state);
-        case 0xd4: return unimplemented_instruction(state);
+        case 0xd3: //OUT D8
+        {
+            //FIXME: actual implementation
+            state->pc++; //skip over the byte for now
+            break;
+        }
+        case 0xd4: //CNC addr
+        {
+            if (!state->cc.cy){
+                uint16_t ret = state->pc+2;
+                state->memory[state->sp-1] = (ret >> 8) & 0xff;
+                state->memory[state->sp-2] = ret & 0xff;
+                state->sp = state->sp-2;
+                state->pc = (opcode[2] << 8) | opcode[1];
+            } else state->pc += 2;
+            break;
+        }
         case 0xd5: //PUSH D
         {
             state->memory[state->sp-2] = state->e;
@@ -1685,7 +1700,16 @@ int emulate8080op(cpu_state* state){
             state->sp -= 2;
             break;
         }
-        case 0xd6: return unimplemented_instruction(state);
+        case 0xd6: //SUI D8
+        {
+            uint8_t res = state->a - opcode[1];
+            state->cc.z = (res & 0xff) == 0;
+            state->cc.s = (0x80 == ((res & 0xff) & 0x80));
+            state->cc.p = parity(res, 8);
+            state->cc.cy = (state->a < opcode[1]);
+            state->pc++;
+            break;
+        }
         case 0xd7: //RST 2
         {
             uint16_t ret = state->pc+2;
@@ -1695,13 +1719,55 @@ int emulate8080op(cpu_state* state){
             state->pc = 0x10;
             break;
         }
-        case 0xd8: return unimplemented_instruction(state);
-        case 0xd9: return unimplemented_instruction(state);
-        case 0xda: return unimplemented_instruction(state);
-        case 0xdb: return unimplemented_instruction(state);
-        case 0xdc: return unimplemented_instruction(state);
-        case 0xdd: return unimplemented_instruction(state);
-        case 0xde: return unimplemented_instruction(state);
+        case 0xd8: //RC
+        {
+            if (state->cc.cy){
+                state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
+                state->sp += 2;
+            }
+            break;
+        }
+        case 0xd9: //-
+        {
+            return unimplemented_instruction(state);
+        }
+        case 0xda: //JC addr
+        {
+            if (state->cc.cy) state->pc = (opcode[2] << 8) | opcode[1];
+            else state->pc += 2;
+            break;
+        }
+        case 0xdb: //IN
+        {
+            //FIXME: Actual implementation
+            state->pc++; //skip over byte for now
+            break;
+        }
+        case 0xdc: //CC addr
+        {
+            if (state->cc.cy){
+                uint16_t ret = state->pc+2;
+                state->memory[state->sp-1] = (ret >> 8) & 0xff;
+                state->memory[state->sp-2] = ret & 0xff;
+                state->sp = state->sp-2;
+                state->pc = (opcode[2] << 8) | opcode[1];
+            } else state->pc += 2;
+            break;
+        }
+        case 0xdd: //-
+        {
+            return unimplemented_instruction(state);
+        }
+        case 0xde: //SBI D8
+        {
+            uint8_t res = state->a - opcode[1] - state->cc.cy;
+            state->cc.z = (res & 0xff) == 0;
+            state->cc.s = (0x80 == ((res & 0xff) & 0x80));
+            state->cc.p = parity(res, 8);
+            state->cc.cy = (state->a < opcode[1]);
+            state->pc++;
+            break;
+        }
         case 0xdf: //RST 3
         {
             uint16_t ret = state->pc+2;
@@ -1711,7 +1777,14 @@ int emulate8080op(cpu_state* state){
             state->pc = 0x18;
             break;
         }
-        case 0xe0: return unimplemented_instruction(state);
+        case 0xe0: //RPO
+        {
+            if (!state->cc.p){
+                state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
+                state->sp += 2;
+            }
+            break;
+        }
         case 0xe1: //POP H
         {
             state->l = state->memory[state->sp];
@@ -1719,9 +1792,33 @@ int emulate8080op(cpu_state* state){
             state->sp += 2;
             break;
         }
-        case 0xe2: return unimplemented_instruction(state);
-        case 0xe3: return unimplemented_instruction(state);
-        case 0xe4: return unimplemented_instruction(state);
+        case 0xe2: //JPO addr
+        {
+            if (!state->cc.p) state->pc = (opcode[2] << 8) | opcode[1];
+            else state->pc += 2;
+            break;
+        }
+        case 0xe3: //XTHL
+        {
+            uint8_t h = state->h;
+            uint8_t l = state->l;
+            state->l = state->memory[state->sp];
+            state->h = state->memory[state->sp + 1];
+            state->memory[state->sp] = l;
+            state->memory[state->sp + 1] = h;
+            break;
+        }
+        case 0xe4: //CPO addr
+        {
+            if (!state->cc.p){
+                uint16_t ret = state->pc+2;
+                state->memory[state->sp-1] = (ret >> 8) & 0xff;
+                state->memory[state->sp-2] = ret & 0xff;
+                state->sp = state->sp-2;
+                state->pc = (opcode[2] << 8) | opcode[1];
+            } else state->pc += 2;
+            break;
+        }
         case 0xe5: //PUSH H
         {
             state->memory[state->sp-2] = state->l;
@@ -1737,6 +1834,7 @@ int emulate8080op(cpu_state* state){
             state->cc.z = (state->a == 0);
             state->cc.s = (0x80 == (state->a & 0x80));
             state->cc.p = parity(state->a, 8);
+            state->pc++;
             break;
         }
         case 0xe7: //RST 4
@@ -1748,9 +1846,25 @@ int emulate8080op(cpu_state* state){
             state->pc = 0x20;
             break;
         }
-        case 0xe8: return unimplemented_instruction(state);
-        case 0xe9: return unimplemented_instruction(state);
-        case 0xea: return unimplemented_instruction(state);
+        case 0xe8: //RPE
+        {
+            if (state->cc.p){
+                state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
+                state->sp += 2;
+            }
+            break;
+        }
+        case 0xe9: //PCHL
+        {
+            state->pc = get_hl_addr(state);
+            break;
+        }
+        case 0xea: //JPE addr
+        {
+            if (state->cc.p) state->pc = (opcode[2] << 8) | opcode[1];
+            else state->pc +=2;
+            break;
+        }
         case 0xeb: //XCHG
         {
             uint8_t temp = 0x0;
@@ -1762,12 +1876,32 @@ int emulate8080op(cpu_state* state){
             state->l = temp;
             break;
         }
-        case 0xec: return unimplemented_instruction(state);
+        case 0xec: //CPE
+        {
+            if (state->cc.p){
+                uint16_t ret = state->pc+2;
+                state->memory[state->sp-1] = (ret >> 8) & 0xff;
+                state->memory[state->sp-2] = ret & 0xff;
+                state->sp = state->sp-2;
+                state->pc = (opcode[2] << 8) | opcode[1];
+            } else state->pc += 2;
+            break;
+        }
         case 0xed: //-
         {
             return unimplemented_instruction(state);
         }
-        case 0xee: return unimplemented_instruction(state);
+        case 0xee: //XRI D8
+        {
+            uint16_t res = (state->a ^ opcode[1]);
+            state->a = res;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            state->pc++;
+            break;
+        }
         case 0xef: //RST 5
         {
             uint16_t ret = state->pc+2;
@@ -1777,15 +1911,40 @@ int emulate8080op(cpu_state* state){
             state->pc = 0x28;
             break;
         }
-        case 0xf0: return unimplemented_instruction(state);
-        case 0xf1: return unimplemented_instruction(state);
-        case 0xf2: return unimplemented_instruction(state);
+        case 0xf0: //RP
+        {
+            if (state->cc.s){
+                state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
+                state->sp += 2;
+            }
+            break;
+        }
+        case 0xf1: //POP PSW
+        {
+            
+        }
+        case 0xf2: //JP addr
+        {
+            if (state->cc.p) state->pc = (opcode[2] << 8) | opcode[1];
+            else state->pc += 2;
+            break;
+        }
         case 0xf3: //DI
         {
             state->int_enable = 0;
             break;
         }
-        case 0xf4: return unimplemented_instruction(state);
+        case 0xf4: //CP addr
+        {
+            if (!state->cc.s){
+                uint16_t ret = state->pc+2;
+                state->memory[state->sp-1] = (ret >> 8) & 0xff;
+                state->memory[state->sp-2] = ret & 0xff;
+                state->sp = state->sp-2;
+                state->pc = (opcode[2] << 8) | opcode[1];
+            } else state->pc += 2;
+            break;
+        }
         case 0xf5: return unimplemented_instruction(state);
         case 0xf6: return unimplemented_instruction(state);
         case 0xf7: //RST 6
@@ -1798,7 +1957,11 @@ int emulate8080op(cpu_state* state){
             break;
         }
         case 0xf8: return unimplemented_instruction(state);
-        case 0xf9: return unimplemented_instruction(state);
+        case 0xf9: //SPHL
+        {
+            state->sp = get_hl_addr(state);
+            break;
+        }
         case 0xfa: //JM addr
         {
             if (state->cc.s){
