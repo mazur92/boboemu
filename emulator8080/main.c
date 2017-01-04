@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "cpu.h"
 #include "main.h"
+#define INVADERS
 
 void read_bin_into_mem(cpu_state *state, char *filename, uint32_t offset){
     FILE *file = fopen(filename, "rb");
@@ -27,10 +28,18 @@ void read_bin_into_mem(cpu_state *state, char *filename, uint32_t offset){
 
 int cmd_processor_loop(const char* bin){
     uint8_t terminated = 0;
-    //cpu_state* state = init8080(0x10000); //for now 16K is default
+    cpu_state* state = init8080(0x4000);
     while (!terminated){
+#ifdef INVADERS
+        read_bin_into_mem(state, "/Users/pawelma/Documents/Programowanie/emulator8080/roms/invaders.h", 0x0000);
+        read_bin_into_mem(state, "/Users/pawelma/Documents/Programowanie/emulator8080/roms/invaders.g", 0x0800);
+        read_bin_into_mem(state, "/Users/pawelma/Documents/Programowanie/emulator8080/roms/invaders.f", 0x1000);
+        read_bin_into_mem(state, "/Users/pawelma/Documents/Programowanie/emulator8080/roms/invaders.e", 0x1800);
+        terminated = emulate8080op(state);
+#else
         terminated = 1; //PLACEHOLDER
         //terminated = emulate8080op(state);
+#endif
     }
     return 0;
 }

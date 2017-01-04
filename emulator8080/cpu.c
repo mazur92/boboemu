@@ -8,6 +8,13 @@
 
 #include "cpu.h"
 
+#define PRINTOPS 1
+#define PRINTREGS 1
+
+#if PRINTOPS
+int instructions_count = 0;
+#endif
+
 int disassemble8080_op(unsigned char *codebuffer, int pc){
     unsigned char *code = &codebuffer[pc];
     int opbytes = 1;
@@ -305,6 +312,13 @@ int parity(int x, int size){
 int emulate8080op(cpu_state* state){
     
     unsigned char *opcode = &state->memory[state->pc];
+    
+#if PRINTOPS
+    disassemble8080_op(state->memory, state->pc);
+    instructions_count += 1;
+    //if (instructions_count == 37390) exit(0); //end of initial black screen
+#endif
+    
     state->pc+=1;
     
     switch (*opcode) {
@@ -324,7 +338,7 @@ int emulate8080op(cpu_state* state){
         case 0x03: //INX B
         {
             state->c++;
-            if (state->b == 0)
+            if (state->c == 0)
                 state->b++;
             break;
         }
@@ -468,7 +482,7 @@ int emulate8080op(cpu_state* state){
         case 0x13: //INX D
         {
             state->e++;
-            if (state->d == 0)
+            if (state->e == 0)
                 state->d++;
             break;
         }
@@ -614,7 +628,7 @@ int emulate8080op(cpu_state* state){
         case 0x23: //INX H
         {
             state->l++;
-            if (state->h == 0)
+            if (state->l == 0)
                 state->h++;
             break;
         }
@@ -1529,7 +1543,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xc0: //RNZ
         {
-            if (state->cc.z){
+            if (state->cc.z == 0){
                 state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
                 state->pc += 2;
             }
@@ -1544,7 +1558,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xc2: //JNZ
         {
-            if (state->cc.z) state->pc = (opcode[2] << 8) | opcode[1];
+            if (state->cc.z == 0) state->pc = (opcode[2] << 8) | opcode[1];
             else state->pc += 2;
             break;
         }
@@ -1555,7 +1569,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xc4: //CNZ addr
         {
-            if (state->cc.z){
+            if (state->cc.z == 0){
                 uint16_t ret = state->pc+2;
                 state->memory[state->sp-1] = (ret >> 8) & 0xff;
                 state->memory[state->sp-2] = ret & 0xff;
@@ -1593,7 +1607,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xc8: //RZ
         {
-            if (!state->cc.z){
+            if (state->cc.z == 0){
                 state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
                 state->sp += 2;
             }
@@ -1607,7 +1621,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xca: //JZ addr
         {
-            if (!state->cc.z) state->pc = (opcode[2] << 8) | opcode[1];
+            if (state->cc.z == 0) state->pc = (opcode[2] << 8) | opcode[1];
             else state->pc += 2;
             break;
         }
@@ -1617,7 +1631,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xcc: //CZ addr
         {
-            if (!state->cc.z){
+            if (state->cc.z == 0){
                 uint16_t ret = state->pc+2;
                 state->memory[state->sp-1] = (ret >> 8) & 0xff;
                 state->memory[state->sp-2] = ret & 0xff;
@@ -1657,7 +1671,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xd0: //RNC
         {
-            if (!state->cc.cy){
+            if (state->cc.cy == 0){
                 state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
                 state->sp += 2;
             }
@@ -1672,7 +1686,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xd2: //JNC addr
         {
-            if (!state->cc.cy) state->pc = (opcode[2] << 8) | opcode[1];
+            if (state->cc.cy == 0) state->pc = (opcode[2] << 8) | opcode[1];
             else state->pc += 2;
             break;
         }
@@ -1684,7 +1698,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xd4: //CNC addr
         {
-            if (!state->cc.cy){
+            if (state->cc.cy == 0){
                 uint16_t ret = state->pc+2;
                 state->memory[state->sp-1] = (ret >> 8) & 0xff;
                 state->memory[state->sp-2] = ret & 0xff;
@@ -1721,7 +1735,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xd8: //RC
         {
-            if (state->cc.cy){
+            if (state->cc.cy == 1){
                 state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
                 state->sp += 2;
             }
@@ -1733,7 +1747,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xda: //JC addr
         {
-            if (state->cc.cy) state->pc = (opcode[2] << 8) | opcode[1];
+            if (state->cc.cy == 1) state->pc = (opcode[2] << 8) | opcode[1];
             else state->pc += 2;
             break;
         }
@@ -1745,7 +1759,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xdc: //CC addr
         {
-            if (state->cc.cy){
+            if (state->cc.cy == 1){
                 uint16_t ret = state->pc+2;
                 state->memory[state->sp-1] = (ret >> 8) & 0xff;
                 state->memory[state->sp-2] = ret & 0xff;
@@ -1779,7 +1793,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xe0: //RPO
         {
-            if (!state->cc.p){
+            if (state->cc.p == 0){
                 state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
                 state->sp += 2;
             }
@@ -1794,7 +1808,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xe2: //JPO addr
         {
-            if (!state->cc.p) state->pc = (opcode[2] << 8) | opcode[1];
+            if (state->cc.p == 0) state->pc = (opcode[2] << 8) | opcode[1];
             else state->pc += 2;
             break;
         }
@@ -1810,7 +1824,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xe4: //CPO addr
         {
-            if (!state->cc.p){
+            if (state->cc.p == 0){
                 uint16_t ret = state->pc+2;
                 state->memory[state->sp-1] = (ret >> 8) & 0xff;
                 state->memory[state->sp-2] = ret & 0xff;
@@ -1848,7 +1862,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xe8: //RPE
         {
-            if (state->cc.p){
+            if (state->cc.p != 0){
                 state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
                 state->sp += 2;
             }
@@ -1861,7 +1875,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xea: //JPE addr
         {
-            if (state->cc.p) state->pc = (opcode[2] << 8) | opcode[1];
+            if (state->cc.p != 0) state->pc = (opcode[2] << 8) | opcode[1];
             else state->pc +=2;
             break;
         }
@@ -1878,7 +1892,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xec: //CPE
         {
-            if (state->cc.p){
+            if (state->cc.p != 0){
                 uint16_t ret = state->pc+2;
                 state->memory[state->sp-1] = (ret >> 8) & 0xff;
                 state->memory[state->sp-2] = ret & 0xff;
@@ -1913,7 +1927,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xf0: //RP
         {
-            if (state->cc.s){
+            if (state->cc.s == 0){
                 state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
                 state->sp += 2;
             }
@@ -1933,7 +1947,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xf2: //JP addr
         {
-            if (state->cc.p) state->pc = (opcode[2] << 8) | opcode[1];
+            if (state->cc.s == 0) state->pc = (opcode[2] << 8) | opcode[1];
             else state->pc += 2;
             break;
         }
@@ -1987,7 +2001,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xf8: //RM
         {
-            if (!state->cc.s){
+            if (state->cc.s == 1){
                 state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
                 state->sp += 2;
             }
@@ -2000,7 +2014,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xfa: //JM addr
         {
-            if (state->cc.s){
+            if (state->cc.s == 1){
                 state->pc = (opcode[2] << 8) | opcode[1];
             } else state->pc += 2;
             break;
@@ -2012,7 +2026,7 @@ int emulate8080op(cpu_state* state){
         }
         case 0xfc: //CM addr
         {
-            if (state->cc.s){
+            if (state->cc.s == 1){
                 uint16_t ret = state->pc+2;
                 state->memory[state->sp-1] = (ret >> 8) & 0xff;
                 state->memory[state->sp-2] = ret & 0xff;
@@ -2027,14 +2041,14 @@ int emulate8080op(cpu_state* state){
         }
         case 0xfe: //CPI D8
         {
-            uint8_t x = state->a = opcode[1];
+            uint8_t x = state->a - opcode[1];
+            state->cc.z = (x == 0);
             if (x & 0x80)
                 state->cc.s = 1;
             else
                 state->cc.s = 0;
             state->cc.p = parity(x, 8);
             state->cc.cy = (state->a < opcode[1]);
-            state->cc.z = (x == 0);
             state->pc++;
             break;
         }
@@ -2048,13 +2062,24 @@ int emulate8080op(cpu_state* state){
             break;
         }
     }
-    state->pc+=1;
+#if PRINTREGS
+    printf("\tC=%d,P=%d,S=%d,Z=%d\n", state->cc.cy, state->cc.p,
+           state->cc.s, state->cc.z);
+    printf("\tA $%02x B $%02x C $%02x D $%02x E $%02x H $%02x L $%02x SP %04x\n",
+           state->a, state->b, state->c, state->d,
+           state->e, state->h, state->l, state->sp);
+    printf("\tCurrent instructions count: %d\n", instructions_count);
+#endif
     return 0;
 }
 
-cpu_state* init8080(int memsize){
-    if (memsize >= 0x10000) memsize = 0x10000 - 1;
+cpu_state* init8080(uint16_t memsize){
     cpu_state* init_state = calloc(1, sizeof(cpu_state));
-    init_state->memory = malloc(memsize); //Initialize memory
+    init_state->memory = calloc(1, memsize); //Initialize memory
+    init_state->cc.z = 0;
+    init_state->cc.s = 0;
+    init_state->cc.cy = 0;
+    init_state->cc.p = 0;
+    init_state->cc.ac = 0;
     return init_state;
 }

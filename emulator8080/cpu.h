@@ -39,7 +39,7 @@ typedef struct cpu_state {
 
 int disassemble8080_op(unsigned char *codebuffer, int pc);
 int emulate8080op(cpu_state* state);
-cpu_state* init8080(int memsize);
+cpu_state* init8080(uint16_t memsize);
 int parity(int x, int size);
 
 #endif /* cpu_h */

@@ -9,7 +9,7 @@
 #ifndef main_h
 #define main_h
 
-#define VERSION "1A001"
+#define VERSION "1A002"
 /* terminal defs */
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
