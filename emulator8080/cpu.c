@@ -1921,7 +1921,15 @@ int emulate8080op(cpu_state* state){
         }
         case 0xf1: //POP PSW
         {
-            
+            state->a = state->memory[state->sp + 1];
+            uint8_t psw  = state->memory[state->sp];
+            state->cc.z = (0x01 == (psw & 0x01));
+            state->cc.s = (0x02 == (psw & 0x02));
+            state->cc.p = (0x04 == (psw & 0x04));
+            state->cc.cy = (0x05 == (psw & 0x08));
+            state->cc.ac = (0x10 == (psw & 0x10));
+            state->sp += 2;
+            break;
         }
         case 0xf2: //JP addr
         {
@@ -1945,8 +1953,29 @@ int emulate8080op(cpu_state* state){
             } else state->pc += 2;
             break;
         }
-        case 0xf5: return unimplemented_instruction(state);
-        case 0xf6: return unimplemented_instruction(state);
+        case 0xf5: //PUSH PSW
+        {
+            state->memory[state->sp - 1] = state->a;
+            uint8_t psw =   (state->cc.z |
+                            state->cc.s << 1 |
+                            state->cc.p << 2 |
+                            state->cc.cy << 3 |
+                            state->cc.ac << 4 );
+            state->memory[state->sp - 2] = psw;
+            state->sp -= 2;
+            break;
+        }
+        case 0xf6: //ORI D8
+        {
+            uint16_t res = (state->a | opcode[1]);
+            state->a = res;
+            state->cc.cy = state->cc.ac = 0;
+            state->cc.z = (state->a == 0);
+            state->cc.s = (0x80 == (state->a & 0x80));
+            state->cc.p = parity(state->a, 8);
+            state->pc++;
+            break;
+        }
         case 0xf7: //RST 6
         {
             uint16_t ret = state->pc+2;
@@ -1956,7 +1985,14 @@ int emulate8080op(cpu_state* state){
             state->pc = 0x30;
             break;
         }
-        case 0xf8: return unimplemented_instruction(state);
+        case 0xf8: //RM
+        {
+            if (!state->cc.s){
+                state->pc = state->memory[state->sp] | (state->memory[state->sp+1] << 8);
+                state->sp += 2;
+            }
+            break;
+        }
         case 0xf9: //SPHL
         {
             state->sp = get_hl_addr(state);
